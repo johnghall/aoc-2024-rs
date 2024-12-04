@@ -1,4 +1,4 @@
-use std::char;
+use std::{char, rc::Rc};
 
 advent_of_code::solution!(4);
 
@@ -11,7 +11,7 @@ pub struct PointInfo {
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
-    let lines = input.lines().collect::<Vec<_>>();
+    let lines = Rc::new(input.lines().collect::<Vec<_>>());
     let column_len = lines.len();
     let row_len = lines[0].len();
     let mut total_xmas_count = 0;
@@ -37,7 +37,7 @@ pub fn part_one(input: &str) -> Option<u32> {
     Some(total_xmas_count as u32)
 }
 
-pub fn check_x_for_xmas(start_point: PointInfo, lines: Vec<&str>) -> i32 {
+pub fn check_x_for_xmas(start_point: PointInfo, lines: Rc<Vec<&str>>) -> i32 {
     let mut count = 0;
     for x_step in -1..=1 {
         for y_step in -1..=1 {
@@ -65,7 +65,7 @@ pub fn get_next_n_letters(
     x_step: isize,
     y_step: isize,
     n: isize,
-    lines: Vec<&str>,
+    lines: Rc<Vec<&str>>,
 ) -> Vec<char> {
     let mut letters = Vec::new();
     for i in 1..=n {
@@ -87,7 +87,7 @@ pub fn get_next_n_letters(
     letters
 }
 
-pub fn get_letter_at_point(info: PointInfo, lines: Vec<&str>) -> Option<char> {
+pub fn get_letter_at_point(info: PointInfo, lines: Rc<Vec<&str>>) -> Option<char> {
     if info.x < 0 || info.y < 0 || info.x >= info.row_len || info.y >= info.column_len {
         return None;
     }
@@ -96,7 +96,7 @@ pub fn get_letter_at_point(info: PointInfo, lines: Vec<&str>) -> Option<char> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    let lines = input.lines().collect::<Vec<_>>();
+    let lines = Rc::new(input.lines().collect::<Vec<_>>());
     let column_len = lines.len();
     let row_len = lines[0].len();
     let mut total_xmas_count = 0;
@@ -122,7 +122,7 @@ pub fn part_two(input: &str) -> Option<u32> {
     Some(total_xmas_count as u32)
 }
 
-pub fn check_a_for_xmas(start_point: PointInfo, lines: Vec<&str>) -> i32 {
+pub fn check_a_for_xmas(start_point: PointInfo, lines: Rc<Vec<&str>>) -> i32 {
     let mut letters = Vec::new();
     for x_step in [-1, 1] {
         for y_step in [-1, 1] {

@@ -8,7 +8,6 @@ pub fn part_one(input: &str) -> Option<u32> {
     let result = matches.map(|m| {
         let num_string = num_regex.find(m.as_str()).unwrap().as_str();
         let nums = num_string.split(',').collect::<Vec<_>>();
-        println!("{:?}", nums);
         nums[0].parse::<u32>().unwrap() * nums[1].parse::<u32>().unwrap()
     });
     Some(result.sum::<u32>())
@@ -32,7 +31,6 @@ pub fn part_two(input: &str) -> Option<u32> {
 
         let num_string = num_regex.find(m.as_str()).unwrap().as_str();
         let nums = num_string.split(',').collect::<Vec<_>>();
-        println!("{:?}", nums);
         nums[0].parse::<u32>().unwrap() * nums[1].parse::<u32>().unwrap()
     });
     Some(result.sum::<u32>())
