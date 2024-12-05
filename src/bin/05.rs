@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{collections::HashMap, rc::Rc};
 
 advent_of_code::solution!(5);
 
@@ -7,25 +7,29 @@ pub fn part_one(input: &str) -> Option<u32> {
     let rules = split.next().unwrap().lines().collect::<Vec<_>>();
     let test_list = split.next().unwrap().lines();
 
-    let ret = test_list
-        .map(|pages| {
-            let page_vec = pages.split(",").collect::<Vec<_>>();
-            let mut needed_rules = Vec::new();
-            for i in 0..page_vec.len() - 1 {
-                for j in i + 1..page_vec.len() {
-                    needed_rules.push(format!("{}|{}", page_vec[i], page_vec[j]));
-                }
-            }
-            for rule in needed_rules {
-                if !rules.contains(&rule.as_str()) {
-                    return 0;
-                }
-            }
+    let mut rules_map = HashMap::new();
+    for rule in rules {
+        let mut split = rule.split("|");
+        let num_1 = split.next().unwrap();
+        let num_2 = split.next().unwrap();
+        rules_map.entry(num_1).or_insert_with(Vec::new).push(num_2);
+    }
 
-            page_vec[page_vec.len() / 2].parse::<i32>().unwrap()
+    let ret = test_list
+        .map(|pages| pages.split(",").map(|x| x.parse::<u32>().unwrap()))
+        .filter(|pages| {
+            pages.clone().is_sorted_by(|a, b| {
+                rules_map
+                    .get(a.to_string().as_str())
+                    .is_some_and(|x| x.contains(&b.to_string().as_str()))
+            })
         })
-        .sum::<i32>();
-    Some(ret as u32)
+        .map(|pages| {
+            let page_vec = pages.collect::<Vec<_>>();
+            page_vec[page_vec.len() / 2]
+        })
+        .sum::<u32>();
+    Some(ret)
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
