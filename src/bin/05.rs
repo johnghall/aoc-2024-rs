@@ -1,4 +1,4 @@
-use std::{collections::HashMap, rc::Rc};
+use std::{cmp, collections::HashMap, rc::Rc};
 
 advent_of_code::solution!(5);
 
@@ -34,55 +34,41 @@ pub fn part_one(input: &str) -> Option<u32> {
 
 pub fn part_two(input: &str) -> Option<u32> {
     let mut split = input.split("\n\n");
-    let rules = Rc::new(split.next().unwrap().lines().collect::<Vec<_>>());
+    let rules = split.next().unwrap().lines().collect::<Vec<_>>();
     let test_list = split.next().unwrap().lines();
 
+    let mut rules_map = HashMap::new();
+    for rule in rules {
+        let mut split = rule.split("|");
+        let num_1 = split.next().unwrap();
+        let num_2 = split.next().unwrap();
+        rules_map.entry(num_1).or_insert_with(Vec::new).push(num_2);
+    }
+
     let ret = test_list
-        .map(|pages| {
-            let page_vec = pages.split(",").collect::<Vec<_>>();
-            let mut needed_rules = Vec::new();
-            for i in 0..page_vec.len() - 1 {
-                for j in i + 1..page_vec.len() {
-                    needed_rules.push(format!("{}|{}", page_vec[i], page_vec[j]));
-                }
-            }
-            for rule in needed_rules {
-                if !rules.contains(&rule.as_str()) {
-                    let corrected_page_order = correct_page_order(&page_vec, rules.clone());
-                    return corrected_page_order[page_vec.len() / 2]
-                        .parse::<i32>()
-                        .unwrap();
-                }
-            }
-
-            0
+        .map(|pages| pages.split(",").map(|x| x.parse::<u32>().unwrap()))
+        .filter(|pages| {
+            !pages.clone().is_sorted_by(|a, b| {
+                rules_map
+                    .get(a.to_string().as_str())
+                    .is_some_and(|x| x.contains(&b.to_string().as_str()))
+            })
         })
-        .sum::<i32>();
-    Some(ret as u32)
-}
-
-pub fn correct_page_order(pages: &Vec<&str>, rules: Rc<Vec<&str>>) -> Vec<String> {
-    let mut needed_rules = Vec::new();
-    for i in 0..pages.len() - 1 {
-        for j in i + 1..pages.len() {
-            needed_rules.push(format!("{}|{}", pages[i], pages[j]));
-        }
-    }
-    for rule in needed_rules {
-        if !rules.contains(&rule.as_str()) {
-            let mut split = rule.split("|");
-            let num_1 = split.next().unwrap();
-            let num_2 = split.next().unwrap();
-            let mut new_pages = pages.clone();
-            new_pages.swap(
-                pages.iter().position(|num| *num == num_1).unwrap(),
-                pages.iter().position(|num| *num == num_2).unwrap(),
-            );
-            return correct_page_order(&new_pages, rules);
-        }
-    }
-
-    pages.iter().map(|s| s.to_string()).collect::<Vec<String>>()
+        .map(|pages| {
+            let mut page_vec = pages.collect::<Vec<_>>();
+            page_vec.sort_by(|a, b| {
+                match rules_map
+                    .get(a.to_string().as_str())
+                    .is_some_and(|x| x.contains(&b.to_string().as_str()))
+                {
+                    true => cmp::Ordering::Less,
+                    _ => cmp::Ordering::Equal,
+                }
+            });
+            page_vec[page_vec.len() / 2]
+        })
+        .sum::<u32>();
+    Some(ret)
 }
 
 #[cfg(test)]
