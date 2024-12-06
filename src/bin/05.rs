@@ -1,4 +1,4 @@
-use std::{cmp, collections::HashMap, rc::Rc};
+use std::{cmp, collections::HashMap};
 
 advent_of_code::solution!(5);
 
